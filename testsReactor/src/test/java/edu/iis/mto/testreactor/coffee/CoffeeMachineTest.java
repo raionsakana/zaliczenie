@@ -12,6 +12,10 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
 @RunWith(MockitoJUnitRunner.class)
 public class CoffeeMachineTest {
 
@@ -53,6 +57,32 @@ public class CoffeeMachineTest {
 
         verify(this.grinder, times(1)).canGrindFor(CoffeeSize.STANDARD);
         verify(this.grinder, times(1)).grind(CoffeeSize.STANDARD);
+    }
+
+    @Test
+    public void testIfGetReceipesInvokedThreeTimes() {
+        Map<CoffeeSize, Integer> waterMap = new HashMap<>();
+        waterMap.put(CoffeeSize.STANDARD, 10);
+
+        CoffeeReceipe coffeeReceipe = CoffeeReceipe
+            .builder()
+            .withMilkAmount(3)
+            .withWaterAmounts(waterMap)
+            .build();
+
+        Optional<CoffeeReceipe> coffeeReceipeOptional = Optional.of(coffeeReceipe);
+        CoffeOrder coffeOrder = mock(CoffeOrder.class);
+
+        when(coffeOrder.getSize()).thenReturn(CoffeeSize.STANDARD);
+        when(coffeOrder.getType()).thenReturn(CoffeType.LATTE);
+
+        when(this.grinder.canGrindFor(CoffeeSize.STANDARD)).thenReturn(true);
+        when(this.grinder.grind(CoffeeSize.STANDARD)).thenReturn(2.3);
+        when(this.coffeeReceipes.getReceipe(CoffeType.LATTE)).thenReturn(coffeeReceipeOptional);
+
+        this.coffeeMachine.make(coffeOrder);
+
+        verify(this.coffeeReceipes, times(3)).getReceipe(CoffeType.LATTE);
     }
 
 }
