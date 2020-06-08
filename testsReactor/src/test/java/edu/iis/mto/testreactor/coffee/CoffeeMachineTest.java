@@ -165,4 +165,30 @@ public class CoffeeMachineTest {
         assertEquals(coffee.getCoffeeWeigthGr().doubleValue(), 2.3, 0.01);
     }
 
+    @Test
+    public void testIfMilkAmountEquals3() throws MilkProviderException {
+        Map<CoffeeSize, Integer> waterMap = new HashMap<>();
+        waterMap.put(CoffeeSize.STANDARD, 10);
+
+        CoffeeReceipe coffeeReceipe = CoffeeReceipe
+                .builder()
+                .withMilkAmount(3)
+                .withWaterAmounts(waterMap)
+                .build();
+
+        Optional<CoffeeReceipe> coffeeReceipeOptional = Optional.of(coffeeReceipe);
+        CoffeOrder coffeOrder = mock(CoffeOrder.class);
+
+        when(coffeOrder.getSize()).thenReturn(CoffeeSize.STANDARD);
+        when(coffeOrder.getType()).thenReturn(CoffeType.LATTE);
+
+        when(this.grinder.canGrindFor(CoffeeSize.STANDARD)).thenReturn(true);
+        when(this.grinder.grind(CoffeeSize.STANDARD)).thenReturn(2.3);
+        when(this.coffeeReceipes.getReceipe(CoffeType.LATTE)).thenReturn(coffeeReceipeOptional);
+
+        Coffee coffee = this.coffeeMachine.make(coffeOrder);
+
+        assertEquals(coffee.getMilkAmout(), Optional.of(3));
+    }
+
 }
