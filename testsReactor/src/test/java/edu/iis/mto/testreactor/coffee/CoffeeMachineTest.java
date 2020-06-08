@@ -2,6 +2,7 @@ package edu.iis.mto.testreactor.coffee;
 
 import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 
@@ -136,6 +137,32 @@ public class CoffeeMachineTest {
         this.coffeeMachine.make(coffeOrder);
 
         verify(this.milkProvider, times(1)).pour(3);
+    }
+
+    @Test
+    public void testIfCoffeeSizeEquals2point3() throws MilkProviderException {
+        Map<CoffeeSize, Integer> waterMap = new HashMap<>();
+        waterMap.put(CoffeeSize.STANDARD, 10);
+
+        CoffeeReceipe coffeeReceipe = CoffeeReceipe
+                .builder()
+                .withMilkAmount(3)
+                .withWaterAmounts(waterMap)
+                .build();
+
+        Optional<CoffeeReceipe> coffeeReceipeOptional = Optional.of(coffeeReceipe);
+        CoffeOrder coffeOrder = mock(CoffeOrder.class);
+
+        when(coffeOrder.getSize()).thenReturn(CoffeeSize.STANDARD);
+        when(coffeOrder.getType()).thenReturn(CoffeType.LATTE);
+
+        when(this.grinder.canGrindFor(CoffeeSize.STANDARD)).thenReturn(true);
+        when(this.grinder.grind(CoffeeSize.STANDARD)).thenReturn(2.3);
+        when(this.coffeeReceipes.getReceipe(CoffeType.LATTE)).thenReturn(coffeeReceipeOptional);
+
+        Coffee coffee = this.coffeeMachine.make(coffeOrder);
+
+        assertEquals(coffee.getCoffeeWeigthGr().doubleValue(), 2.3, 0.01);
     }
 
 }
