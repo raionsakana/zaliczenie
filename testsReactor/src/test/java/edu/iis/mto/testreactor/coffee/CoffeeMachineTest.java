@@ -1,8 +1,9 @@
 package edu.iis.mto.testreactor.coffee;
 
+import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 
 import edu.iis.mto.testreactor.coffee.milkprovider.MilkProvider;
 import org.junit.Before;
@@ -40,5 +41,18 @@ public class CoffeeMachineTest {
         this.coffeeMachine.make(mock(CoffeOrder.class));
     }
 
+    @Test(expected = Exception.class)
+    public void testIfGrinderIsUsed() {
+        CoffeOrder coffeOrder = mock(CoffeOrder.class);
+
+        when(coffeOrder.getSize()).thenReturn(CoffeeSize.STANDARD);
+        when(this.grinder.canGrindFor(CoffeeSize.STANDARD)).thenReturn(true);
+        when(this.grinder.grind(CoffeeSize.STANDARD)).thenReturn(2.3);
+
+        this.coffeeMachine.make(coffeOrder);
+
+        verify(this.grinder, times(1)).canGrindFor(CoffeeSize.STANDARD);
+        verify(this.grinder, times(1)).grind(CoffeeSize.STANDARD);
+    }
 
 }
